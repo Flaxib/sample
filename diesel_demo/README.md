@@ -1,37 +1,67 @@
+This project is a simple example of usage of a Postgres database in Rust with the Diesel package.
+
 # Environment
 
-## To install postgreSQL:
+Requierements:
+ - Rust compiler
+ - Docker
+ - Node
+
+## Install Diesel CLI
 
 ```sh
-sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
-wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
-sudo apt-get update
-sudo apt-get -y install postgresql
 sudo apt install libpq-dev
 cargo install diesel_cli --no-default-features --features "postgres"
 ```
 
-Install PostgreSQL:  
-https://www.postgresql.org/download/linux/ubuntu/
+Documentation links:  
+[Tutorial get started with Diesel](https://diesel.rs/guides/getting-started)
+# Launch the project
 
-## Install pgadmin4
+To create the db with `diesel`, one time:
+```sh
+diesel setup
+```
+## Launch PostgreSQL server
 
 ```sh
-curl  -fsSL https://www.pgadmin.org/static/packages_pgadmin_org.pub | sudo gpg --dearmor -o /etc/apt/trusted.gpg.d/pgadmin.gpg
-sudo sh -c 'echo "deb https://ftp.postgresql.org/pub/pgadmin/pgadmin4/apt/$(lsb_release -cs) pgadmin4 main" > /etc/apt/sources.list.d/pgadmin4.list'
-sudo apt update
-sudo apt install pgadmin4
+docker run --name diesel-demo -p 5432:5432 -e POSTGRES_PASSWORD=toto -e POSTGRES_USER=frozar -e POSTGRES_DB=diesel-demo -d postgres
 ```
 
-Install pgadmin4:  
-https://www.howtoforge.com/how-to-install-postgresql-and-pgadmin4-on-ubuntu-1804-lts/#install-pgadmin-from-repository
 
-## Start using Diesel
+Retrieve the [IP address of the docker postgres container](https://stackoverflow.com/questions/53610385/docker-postgres-and-pgadmin-4-connection-refused#answer-56334518
+):
+```sh
+docker network inspect bridge | node getContainerIP.js diesel-demo
+```
 
+[Documentation link](https://dev.to/shree_j/how-to-install-and-run-psql-using-docker-41j2)
 
+## Launch Pgadmin4
 
-Page of package Diesel:  
-https://crates.io/crates/diesel_cli
+```sh
+docker run --rm -p 5050:80 -e PGADMIN_DEFAULT_EMAIL=fabien@flaxib.re -e PGADMIN_DEFAULT_PASSWORD=toto dpage/pgadmin4
+```
 
-Tutorial get started with Diesel:  
-https://diesel.rs/guides/getting-started
+[Documentation link](https://www.pgadmin.org/docs/pgadmin4/development/container_deployment.html)
+
+## Test the project
+
+```sh
+cargo run --bin show_posts
+cargo run --bin write_post
+cargo run --bin publish_post 0
+cargo run --bin show_posts
+cargo run --bin delete_post Agate
+
+cargo run --bin dump_posts
+cargo run --bin seed 10
+cargo run --bin dump_posts
+cargo run --bin wipe
+```
+
+# Documentation links
+
+[The package Diesel](https://crates.io/crates/diesel_cli)
+
+[Tutorial get started with Diesel](https://diesel.rs/guides/getting-started)
