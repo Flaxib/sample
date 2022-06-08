@@ -16,12 +16,43 @@ cargo install diesel_cli --no-default-features --features "postgres"
 
 Documentation links:  
 [Tutorial get started with Diesel](https://diesel.rs/guides/getting-started)
-# Launch the project
+
+## Launch servers
 
 To create the db with `diesel`, one time:
 ```sh
+docker-compose up -d --remove-orphans
 diesel setup
 ```
+
+## Test the project
+
+```sh
+cargo run --bin show_posts
+cargo run --bin write_post
+cargo run --bin publish_post 0
+cargo run --bin show_posts
+cargo run --bin delete_post Agate
+
+cargo run --bin dump_posts
+cargo run --bin seed 10
+cargo run --bin dump_posts
+cargo run --bin wipe
+```
+
+## Stop servers
+
+```sh
+docker-compose down
+```
+# Documentation links
+
+[The package Diesel](https://crates.io/crates/diesel_cli)
+
+[Tutorial get started with Diesel](https://diesel.rs/guides/getting-started)
+
+# Previously
+
 ## Launch PostgreSQL server
 
 ```sh
@@ -44,24 +75,3 @@ docker run --rm -p 5050:80 -e PGADMIN_DEFAULT_EMAIL=fabien@flaxib.re -e PGADMIN_
 ```
 
 [Documentation link](https://www.pgadmin.org/docs/pgadmin4/development/container_deployment.html)
-
-## Test the project
-
-```sh
-cargo run --bin show_posts
-cargo run --bin write_post
-cargo run --bin publish_post 0
-cargo run --bin show_posts
-cargo run --bin delete_post Agate
-
-cargo run --bin dump_posts
-cargo run --bin seed 10
-cargo run --bin dump_posts
-cargo run --bin wipe
-```
-
-# Documentation links
-
-[The package Diesel](https://crates.io/crates/diesel_cli)
-
-[Tutorial get started with Diesel](https://diesel.rs/guides/getting-started)
