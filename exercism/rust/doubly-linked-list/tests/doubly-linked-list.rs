@@ -172,38 +172,38 @@ fn basics_push_front_pop_back() {
     assert!(list.is_empty());
 }
 
-// #[test]
-// fn basics_push_back_pop_front() {
-//     let mut list: LinkedList<i32> = LinkedList::new();
-//     for i in 0..10 {
-//         list.push_back(i);
-//         assert_eq!(list.len(), i as usize + 1);
-//         assert!(!list.is_empty());
-//     }
-//     for i in 0..10 {
-//         assert_eq!(list.len(), 10 - i as usize);
-//         assert!(!list.is_empty());
-//         assert_eq!(i, list.pop_front().unwrap());
-//     }
-//     assert_eq!(list.len(), 0);
-//     assert!(list.is_empty());
-// }
+#[test]
+fn basics_push_back_pop_front() {
+    let mut list: LinkedList<i32> = LinkedList::new();
+    for i in 0..10 {
+        list.push_back(i);
+        assert_eq!(list.len(), i as usize + 1);
+        assert!(!list.is_empty());
+    }
+    for i in 0..10 {
+        assert_eq!(list.len(), 10 - i as usize);
+        assert!(!list.is_empty());
+        assert_eq!(i, list.pop_front().unwrap());
+    }
+    assert_eq!(list.len(), 0);
+    assert!(list.is_empty());
+}
 
-// // ———————————————————————————————————————————————————————————
-// // Tests for Step 2: iteration
-// // ———————————————————————————————————————————————————————————
+// ———————————————————————————————————————————————————————————
+// Tests for Step 2: iteration
+// ———————————————————————————————————————————————————————————
 
-// #[test]
-// fn iter() {
-//     let mut list: LinkedList<i32> = LinkedList::new();
-//     for num in 0..10 {
-//         list.push_back(num);
-//     }
+#[test]
+fn iter() {
+    let mut list: LinkedList<i32> = LinkedList::new();
+    for num in 0..10 {
+        list.push_back(num);
+    }
 
-//     for (num, &entered_num) in (0..10).zip(list.iter()) {
-//         assert_eq!(num, entered_num);
-//     }
-// }
+    for (num, &entered_num) in (0..10).zip(list.iter()) {
+        assert_eq!(num, entered_num);
+    }
+}
 
 // // ———————————————————————————————————————————————————————————
 // // Tests for Step 3: full cursor functionality
