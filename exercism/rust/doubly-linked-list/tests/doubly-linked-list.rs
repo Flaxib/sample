@@ -205,101 +205,117 @@ fn iter() {
     }
 }
 
-// // ———————————————————————————————————————————————————————————
-// // Tests for Step 3: full cursor functionality
-// // ———————————————————————————————————————————————————————————
+// ———————————————————————————————————————————————————————————
+// Tests for Step 3: full cursor functionality
+// ———————————————————————————————————————————————————————————
 
-// #[test]
-// fn cursor_insert_before_on_empty_list() {
-//     // insert_after on empty list is already tested via push_back()
-//     let mut list = LinkedList::new();
-//     list.cursor_front().insert_before(0);
-//     assert_eq!(Some(0), list.pop_front());
-// }
+#[test]
+fn cursor_insert_before_on_empty_list() {
+    // insert_after on empty list is already tested via push_back()
+    let mut list = LinkedList::new();
+    list.cursor_front().insert_before(0);
+    assert_eq!(Some(0), list.pop_front());
+}
 
-// #[test]
-// fn cursor_insert_after_in_middle() {
-//     let mut list = (0..10).collect::<LinkedList<_>>();
+#[test]
+fn cursor_insert_after_in_middle() {
+    let mut list = (0..10).collect::<LinkedList<_>>();
 
-//     {
-//         let mut cursor = list.cursor_front();
-//         let didnt_run_into_end = cursor.seek_forward(4);
-//         assert!(didnt_run_into_end);
+    {
+        let mut cursor = list.cursor_front();
+        let didnt_run_into_end = cursor.seek_forward(4);
+        assert!(didnt_run_into_end);
 
-//         for n in (0..10).rev() {
-//             cursor.insert_after(n);
-//         }
-//     }
+        for n in (0..10).rev() {
+            cursor.insert_after(n);
+        }
+    }
 
-//     assert_eq!(list.len(), 20);
+    assert_eq!(list.len(), 20);
 
-//     let expected = (0..5).chain(0..10).chain(5..10);
+    let expected = (0..5).chain(0..10).chain(5..10);
 
-//     assert!(expected.eq(list.iter().cloned()));
-// }
+    assert!(expected.eq(list.iter().cloned()));
+}
 
-// #[test]
-// fn cursor_insert_before_in_middle() {
-//     let mut list = (0..10).collect::<LinkedList<_>>();
+#[test]
+fn cursor_insert_before_in_middle() {
+    let mut list = (0..10).collect::<LinkedList<_>>();
 
-//     {
-//         let mut cursor = list.cursor_back();
-//         let didnt_run_into_end = cursor.seek_backward(4);
-//         assert!(didnt_run_into_end);
+    {
+        let mut cursor = list.cursor_back();
+        let didnt_run_into_end = cursor.seek_backward(4);
+        assert!(didnt_run_into_end);
 
-//         for n in 0..10 {
-//             cursor.insert_before(n);
-//         }
-//     }
+        for n in 0..10 {
+            cursor.insert_before(n);
+        }
+    }
 
-//     assert_eq!(list.len(), 20);
+    assert_eq!(list.len(), 20);
 
-//     let expected = (0..5).chain(0..10).chain(5..10);
+    let expected = (0..5).chain(0..10).chain(5..10);
 
-//     assert!(expected.eq(list.iter().cloned()));
-// }
+    assert!(expected.eq(list.iter().cloned()));
+}
 
-// // "iterates" via next() and checks that it visits the right elements
-// #[test]
-// fn cursor_next_and_peek() {
-//     let mut list = (0..10).collect::<LinkedList<_>>();
-//     let mut cursor = list.cursor_front();
+// "iterates" via next() and checks that it visits the right elements
+#[test]
+fn cursor_next_and_peek() {
+    let mut list = (0..10).collect::<LinkedList<_>>();
+    let mut cursor = list.cursor_front();
 
-//     assert_eq!(cursor.peek_mut(), Some(&mut 0));
+    assert_eq!(cursor.peek_mut(), Some(&mut 0));
 
-//     for n in 1..10 {
-//         let next = cursor.next().cloned();
-//         assert_eq!(next, Some(n));
-//         assert_eq!(next, cursor.peek_mut().cloned());
-//     }
-// }
+    for n in 1..10 {
+        let next = cursor.next().cloned();
+        assert_eq!(next, Some(n));
+        assert_eq!(next, cursor.peek_mut().cloned());
+    }
+}
 
-// // "iterates" via prev() and checks that it visits the right elements
-// #[test]
-// fn cursor_prev_and_peek() {
-//     let mut list = (0..10).collect::<LinkedList<_>>();
-//     let mut cursor = list.cursor_back();
+// "iterates" via prev() and checks that it visits the right elements
+#[test]
+fn cursor_prev_and_peek() {
+    let mut list = (0..10).collect::<LinkedList<_>>();
+    let mut cursor = list.cursor_back();
 
-//     assert_eq!(cursor.peek_mut(), Some(&mut 9));
+    assert_eq!(cursor.peek_mut(), Some(&mut 9));
 
-//     for n in (0..9).rev() {
-//         let prev = cursor.prev().cloned();
-//         assert_eq!(prev, Some(n));
-//         assert_eq!(prev, cursor.peek_mut().cloned());
-//     }
-// }
+    for n in (0..9).rev() {
+        let prev = cursor.prev().cloned();
+        assert_eq!(prev, Some(n));
+        assert_eq!(prev, cursor.peek_mut().cloned());
+    }
+}
 
-// // removes all elements starting from the middle
-// #[test]
-// fn cursor_take() {
-//     let mut list = (0..10).collect::<LinkedList<_>>();
-//     let mut cursor = list.cursor_front();
-//     cursor.seek_forward(5);
+// removes all elements starting from the middle
+#[test]
+fn cursor_take_custom() {
+    let mut list = (0..3).collect::<LinkedList<_>>();
+    let mut cursor = list.cursor_front();
+    let seek_res = cursor.seek_forward(2);
+    dbg!(seek_res);
 
-//     for expected in (5..10).chain((0..5).rev()) {
-//         assert_eq!(cursor.take(), Some(expected));
-//     }
-// }
+    // for expected in (5..10).chain((0..5).rev()) {
+    //     assert_eq!(cursor.take(), Some(expected));
+    // }
+    assert_eq!(cursor.take(), Some(2));
+    assert_eq!(cursor.take(), Some(1));
+    assert_eq!(cursor.take(), Some(0));
+}
+
+// removes all elements starting from the middle
+#[test]
+fn cursor_take() {
+    let mut list = (0..10).collect::<LinkedList<_>>();
+    let mut cursor = list.cursor_front();
+    cursor.seek_forward(5);
+
+    for expected in (5..10).chain((0..5).rev()) {
+        assert_eq!(cursor.take(), Some(expected));
+    }
+}
 
 // // ———————————————————————————————————————————————————————————
 // // Tests for Step 4: clean-up via `Drop`

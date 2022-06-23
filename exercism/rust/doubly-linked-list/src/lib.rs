@@ -32,7 +32,10 @@ pub struct Cursor<'a, T> {
     _marker: std::marker::PhantomData<&'a mut T>,
 }
 
-pub struct Iter<'a, T>(std::marker::PhantomData<&'a T>);
+pub struct Iter<'a, T> {
+    node: *const LinkedListNode<T>,
+    _marker: std::marker::PhantomData<&'a T>,
+}
 
 // impl<T> LinkedListNode<T> {
 //     pub fn new() -> Self {
@@ -121,17 +124,17 @@ impl<T> LinkedList<T> {
             while !current_node.previous.is_null() {
                 current_node = &mut *current_node.previous;
 
-                if (*self.node).content.is_null() {
-                    if !(*self.node).next.is_null() {
-                        panic!("next case: A node in the middle of the list is not used");
-                    }
+                // if (*self.node).content.is_null() {
+                //     if !(*self.node).next.is_null() {
+                //         panic!("next case: A node in the middle of the list is not used");
+                //     }
 
-                    alloc::dealloc(
-                        self.node as *mut u8,
-                        alloc::Layout::new::<LinkedListNode<T>>(),
-                    );
-                    self.node = current_node;
-                }
+                //     alloc::dealloc(
+                //         self.node as *mut u8,
+                //         alloc::Layout::new::<LinkedListNode<T>>(),
+                //     );
+                //     self.node = current_node;
+                // }
             }
 
             Cursor {
@@ -154,17 +157,17 @@ impl<T> LinkedList<T> {
             while !current_node.next.is_null() {
                 current_node = &mut *current_node.next;
 
-                if (*self.node).content.is_null() {
-                    if !(*self.node).previous.is_null() {
-                        panic!("previous case: A node in the middle of the list is not used");
-                    }
+                // if (*self.node).content.is_null() {
+                //     if !(*self.node).previous.is_null() {
+                //         panic!("previous case: A node in the middle of the list is not used");
+                //     }
 
-                    alloc::dealloc(
-                        self.node as *mut u8,
-                        alloc::Layout::new::<LinkedListNode<T>>(),
-                    );
-                    self.node = current_node;
-                }
+                //     alloc::dealloc(
+                //         self.node as *mut u8,
+                //         alloc::Layout::new::<LinkedListNode<T>>(),
+                //     );
+                //     self.node = current_node;
+                // }
             }
 
             Cursor {
@@ -177,7 +180,18 @@ impl<T> LinkedList<T> {
 
     /// Return an iterator that moves from front to back
     pub fn iter(&self) -> Iter<'_, T> {
-        unimplemented!()
+        unsafe {
+            let mut current_node = self.node as *const LinkedListNode<T>;
+
+            while !(*current_node).previous.is_null() {
+                current_node = (*current_node).previous;
+            }
+
+            Iter {
+                node: current_node,
+                _marker: std::marker::PhantomData,
+            }
+        }
     }
 }
 
@@ -234,28 +248,54 @@ impl<T> Cursor<'_, T> {
             && self.node.previous.is_null()
             && !self.node.next.is_null()
         {
+            let to_deallocate = self.node as *mut LinkedListNode<T>;
+
             // Go to the next node
             self.next();
 
             // Drop the whole node, value involved
-            drop(self.node.previous);
+            // drop(self.node.previous);
+            // self.node.previous = ptr::null::<*mut LinkedListNode<T>>() as *mut LinkedListNode<T>;
+
+            unsafe {
+                alloc::dealloc(
+                    to_deallocate as *mut u8,
+                    alloc::Layout::new::<*mut LinkedListNode<T>>(),
+                );
+            }
+
             self.node.previous = ptr::null::<*mut LinkedListNode<T>>() as *mut LinkedListNode<T>;
 
-            self.root.node = self.node;
+            if to_deallocate == self.root.node {
+                self.root.node = self.node;
+            }
 
             None
         } else if self.node.content.is_null()
             && !self.node.previous.is_null()
             && self.node.next.is_null()
         {
+            let to_deallocate = self.node as *mut LinkedListNode<T>;
+
             // Go to the previous node
             self.prev();
 
             // Drop the whole node, value involved
-            drop(self.node.next);
+            // drop(self.node.next);
+            // self.node.next = ptr::null::<*mut LinkedListNode<T>>() as *mut LinkedListNode<T>;
+
+            unsafe {
+                alloc::dealloc(
+                    to_deallocate as *mut u8,
+                    alloc::Layout::new::<*mut LinkedListNode<T>>(),
+                );
+            }
+
             self.node.next = ptr::null::<*mut LinkedListNode<T>>() as *mut LinkedListNode<T>;
 
-            self.root.node = self.node;
+            if to_deallocate == self.root.node {
+                self.root.node = self.node;
+            };
 
             None
         } else if self.node.content.is_null()
@@ -267,28 +307,34 @@ impl<T> Cursor<'_, T> {
             && !self.node.previous.is_null()
             && !self.node.next.is_null()
         {
-            // Link remaining nodes
             unsafe {
+                // Link remaining nodes
                 (*self.node.previous).next = self.node.next;
                 (*self.node.next).previous = self.node.previous;
-            }
 
-            unsafe {
                 // Retrieve value before drop
                 let res = ptr::read(self.node.content);
 
                 alloc::dealloc(self.node.content as *mut u8, alloc::Layout::new::<T>());
                 self.node.content = ptr::null::<*mut T>() as *mut T;
 
+                let to_deallocate = self.node as *mut LinkedListNode<T>;
+
                 // Go to the next node
                 self.next();
 
                 // Drop the whole node, value involved
-                drop(self.node.previous);
-                self.node.previous =
-                    ptr::null::<*mut LinkedListNode<T>>() as *mut LinkedListNode<T>;
+                // drop(self.node.previous);
+                // self.node.previous =
+                //     ptr::null::<*mut LinkedListNode<T>>() as *mut LinkedListNode<T>;
+                alloc::dealloc(
+                    to_deallocate as *mut u8,
+                    alloc::Layout::new::<*mut LinkedListNode<T>>(),
+                );
 
-                self.root.node = self.node;
+                if to_deallocate == self.root.node {
+                    self.root.node = self.node;
+                };
 
                 Some(res)
             }
@@ -303,15 +349,26 @@ impl<T> Cursor<'_, T> {
                 alloc::dealloc(self.node.content as *mut u8, alloc::Layout::new::<T>());
                 self.node.content = ptr::null::<*mut T>() as *mut T;
 
+                let to_deallocate = self.node as *mut LinkedListNode<T>;
+
                 // Go to the next node
                 self.next();
 
                 // Drop the whole node, value involved
-                drop(self.node.previous);
+                // drop(self.node.previous);
+                // self.node.previous =
+                //     ptr::null::<*mut LinkedListNode<T>>() as *mut LinkedListNode<T>;
+                alloc::dealloc(
+                    to_deallocate as *mut u8,
+                    alloc::Layout::new::<*mut LinkedListNode<T>>(),
+                );
+
                 self.node.previous =
                     ptr::null::<*mut LinkedListNode<T>>() as *mut LinkedListNode<T>;
 
-                self.root.node = self.node;
+                if to_deallocate == self.root.node {
+                    self.root.node = self.node;
+                };
 
                 Some(res)
             }
@@ -327,15 +384,25 @@ impl<T> Cursor<'_, T> {
 
                 alloc::dealloc(self.node.content as *mut u8, alloc::Layout::new::<T>());
                 self.node.content = ptr::null::<*mut T>() as *mut T;
+
+                let to_deallocate = self.node as *mut LinkedListNode<T>;
 
                 // Go to the previous node
                 self.prev();
 
                 // Drop the whole node, value involved
-                drop(self.node.next);
+                // drop(self.node.next);
+                // self.node.next = ptr::null::<*mut LinkedListNode<T>>() as *mut LinkedListNode<T>;
+                alloc::dealloc(
+                    to_deallocate as *mut u8,
+                    alloc::Layout::new::<*mut LinkedListNode<T>>(),
+                );
+
                 self.node.next = ptr::null::<*mut LinkedListNode<T>>() as *mut LinkedListNode<T>;
 
-                self.root.node = self.node;
+                if to_deallocate == self.root.node {
+                    self.root.node = self.node;
+                }
 
                 Some(res)
             }
@@ -343,18 +410,15 @@ impl<T> Cursor<'_, T> {
             && self.node.previous.is_null()
             && self.node.next.is_null()
         {
-            // The initial node is allocated on the stack, so doesn't need to be dropped
-            // TODO: This is not necessary the initial node!
-            // Some(unsafe { *self.node.content.as_ptr() })
-            // self.node.content.is_null() = false;
-
             unsafe {
                 let res = ptr::read(self.node.content);
 
                 alloc::dealloc(self.node.content as *mut u8, alloc::Layout::new::<T>());
                 self.node.content = ptr::null::<*mut T>() as *mut T;
 
-                self.root.node = self.node;
+                // if to_deallocate == self.root.node {
+                //     self.root.node = self.node;
+                // };
 
                 Some(res)
             }
@@ -508,6 +572,18 @@ impl<'a, T> Iterator for Iter<'a, T> {
     type Item = &'a T;
 
     fn next(&mut self) -> Option<&'a T> {
-        unimplemented!()
+        // self.cursor.next()
+        unsafe {
+            // let res = ptr::read(self.node.content);
+            if self.node.is_null() {
+                None
+            } else {
+                let res = &*(*self.node).content;
+
+                self.node = (*self.node).next;
+
+                Some(res)
+            }
+        }
     }
 }
