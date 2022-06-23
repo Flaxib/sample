@@ -1,0 +1,84 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug unit tests in library 'doubly-linked-list'",
+      "cargo": {
+        "args": [
+          "test",
+          "--no-run",
+          "--lib",
+          "--package=doubly-linked-list"
+        ],
+        "filter": {
+          "name": "doubly-linked-list",
+          "kind": "lib"
+        }
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug integration test 'doubly-linked-list'",
+      "cargo": {
+        "args": [
+          "test",
+          "--no-run",
+          "--test=doubly-linked-list",
+          "--package=doubly-linked-list"
+        ],
+        "filter": {
+          "name": "doubly-linked-list",
+          "kind": "test"
+        }
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug integration test 'step_4_leak_test_2'",
+      "cargo": {
+        "args": [
+          "test",
+          "--no-run",
+          "--test=step_4_leak_test_2",
+          "--package=doubly-linked-list"
+        ],
+        "filter": {
+          "name": "step_4_leak_test_2",
+          "kind": "test"
+        }
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug integration test 'step_4_leak_test_1'",
+      "cargo": {
+        "args": [
+          "test",
+          "--no-run",
+          "--test=step_4_leak_test_1",
+          "--package=doubly-linked-list"
+        ],
+        "filter": {
+          "name": "step_4_leak_test_1",
+          "kind": "test"
+        }
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    }
+  ]
+}
