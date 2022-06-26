@@ -317,13 +317,13 @@ fn cursor_take() {
     }
 }
 
-// // ———————————————————————————————————————————————————————————
-// // Tests for Step 4: clean-up via `Drop`
-// // ———————————————————————————————————————————————————————————
+// ———————————————————————————————————————————————————————————
+// Tests for Step 4: clean-up via `Drop`
+// ———————————————————————————————————————————————————————————
 
-// // The leak tests that are also for this step are separated into
-// // their own files so that nothing else interferes with the allocator
-// // whilst they run
+// The leak tests that are also for this step are separated into
+// their own files so that nothing else interferes with the allocator
+// whilst they run
 
 // // checks number of drops
 // // may pass for incorrect programs if double frees happen

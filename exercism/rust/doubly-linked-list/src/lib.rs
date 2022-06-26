@@ -3,18 +3,33 @@
 // You are free to use anything in it, but it's mainly for the test framework.
 mod pre_implemented;
 
+// Documentation links:
+// https://www.youtube.com/watch?v=TJOFSMpJdzg&ab_channel=JonGjengset
+//
+// Nightly supported only:
+// https://youtu.be/TJOFSMpJdzg?t=1154
+// #![feature(dropck_eyepatch)] and #[may_dangle] :
+//   - tell the compiler the T fields will not be accessed/used in the Drop implementation
+//
+// Stablely supported:
+// https://youtu.be/TJOFSMpJdzg?t=1993
+// PhantomData<T> :
+//   - assume drop over T field will with be trigger in Drop implementation
+//
+// https://youtu.be/TJOFSMpJdzg?t=2756
+// NonNull<T> :
+//   - covariant with T: can use <'static T> where <'a T> is expected
+//   - let Rust do the aliasing analisis, whereas it's not possible with `*mut T`
+//   - allow the null pointer optimisation
+//   (https://stackoverflow.com/questions/46557608/what-is-the-null-pointer-optimization-in-rust)
+//
+// https://www.youtube.com/watch?v=iVYWDIW71jk&ab_channel=JonGjengset
+
 use std::alloc;
-// use std::alloc::{alloc, dealloc, Layout};
 use std::ptr;
 use std::ptr::NonNull;
 
-// use std::vec::Vec;
-
 pub struct LinkedList<T> {
-    // content: NonNull<T>,
-    // is_initialised: bool,
-    // previous: *mut LinkedList<T>,
-    // next: *mut LinkedList<T>,
     node: *mut LinkedListNode<T>,
     _marker: std::marker::PhantomData<T>,
 }
