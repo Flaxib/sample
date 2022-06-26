@@ -239,6 +239,17 @@ fn cursor_insert_after_in_middle() {
 }
 
 #[test]
+fn cursor_insert_after_in_middle_custom() {
+    let list = (0..1).collect::<LinkedList<_>>();
+
+    dbg!("begin");
+    for i in list.iter() {
+        dbg!(i);
+    }
+    dbg!("end");
+}
+
+#[test]
 fn cursor_insert_before_in_middle() {
     let mut list = (0..10).collect::<LinkedList<_>>();
 
@@ -317,13 +328,13 @@ fn cursor_take() {
     }
 }
 
-// ———————————————————————————————————————————————————————————
-// Tests for Step 4: clean-up via `Drop`
-// ———————————————————————————————————————————————————————————
+// // ———————————————————————————————————————————————————————————
+// // Tests for Step 4: clean-up via `Drop`
+// // ———————————————————————————————————————————————————————————
 
-// The leak tests that are also for this step are separated into
-// their own files so that nothing else interferes with the allocator
-// whilst they run
+// // The leak tests that are also for this step are separated into
+// // their own files so that nothing else interferes with the allocator
+// // whilst they run
 
 // // checks number of drops
 // // may pass for incorrect programs if double frees happen
