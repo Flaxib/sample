@@ -340,6 +340,52 @@ fn cursor_take() {
 // // may pass for incorrect programs if double frees happen
 // // exactly as often as destructor leaks
 // #[test]
+// fn drop_no_double_frees_custom() {
+//     use std::cell::Cell;
+
+//     #[derive(Debug)]
+//     struct DropCounter<'a>(&'a Cell<usize>);
+//     // struct DropCounter<'a>(&'a i32);
+
+//     impl<'a> Drop for DropCounter<'a> {
+//         fn drop(&mut self) {
+//             println!("Drop is called");
+//             dbg!(&self);
+//             dbg!(self.0.get());
+//             let num = self.0.get();
+//             self.0.set(num + 1);
+//         }
+//     }
+
+//     // const N: usize = 1;
+
+//     let counter = Cell::new(0);
+//     // let counter = 0;
+//     // let mut list = std::iter::repeat_with(|| DropCounter(&counter))
+//     //     .take(N)
+//     //     .collect::<Vec<_>>();
+
+//     // let mut list = vec![];
+//     // list.push(DropCounter(&counter));
+//     // list.push(DropCounter(&counter));
+
+//     let mut list: LinkedList<DropCounter> = LinkedList::new();
+//     assert_eq!(list.len(), 0);
+//     list.push_back(DropCounter(&counter));
+//     list.push_back(DropCounter(&counter));
+
+//     // assert_eq!(list.len(), 1);
+
+//     // assert_eq!(list.len(), 2);
+//     // drop(list);
+//     // assert_eq!(counter.get(), 2);
+
+//     // assert_eq!(list.len(), N);
+//     // drop(list);
+//     // assert_eq!(counter.get(), N);
+// }
+
+// #[test]
 // fn drop_no_double_frees() {
 //     use std::cell::Cell;
 //     struct DropCounter<'a>(&'a Cell<usize>);
@@ -361,6 +407,11 @@ fn cursor_take() {
 //     assert_eq!(list.len(), N);
 //     drop(list);
 //     assert_eq!(counter.get(), N);
+// }
+
+// #[test]
+// fn drop_large_list_custom() {
+//     drop((0..200_000).collect::<LinkedList<i32>>());
 // }
 
 // #[test]

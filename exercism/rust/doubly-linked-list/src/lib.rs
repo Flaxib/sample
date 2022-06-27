@@ -24,6 +24,7 @@ mod pre_implemented;
 //   (https://stackoverflow.com/questions/46557608/what-is-the-null-pointer-optimization-in-rust)
 //
 // https://www.youtube.com/watch?v=iVYWDIW71jk&ab_channel=JonGjengset
+// https://rust-unofficial.github.io/too-many-lists/sixth.html
 
 use std::alloc;
 use std::ptr;
@@ -81,9 +82,9 @@ impl<T> LinkedListNode<T> {
             let ptr = alloc::alloc(new_layout) as *mut T;
 
             match NonNull::new(ptr as *mut T) {
-                Some(ptr) => {
-                    *ptr.as_ptr() = element;
-                    ptr
+                Some(res_ptr) => {
+                    ptr::write(res_ptr.as_ptr(), element);
+                    res_ptr
                 }
                 None => alloc::handle_alloc_error(new_layout),
             }
