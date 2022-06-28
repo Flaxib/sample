@@ -50,7 +50,6 @@ struct LinkedListNode<T> {
 pub struct Cursor<'a, T> {
     node: &'a mut LinkedListNode<T>,
     root: &'a mut LinkedList<T>,
-    _marker: std::marker::PhantomData<&'a mut T>,
 }
 
 pub struct Iter<'a, T> {
@@ -61,25 +60,15 @@ pub struct Iter<'a, T> {
 
 impl<T> LinkedListNode<T> {
     pub fn create(element: T) -> NonNull<Self> {
-        let new_layout = alloc::Layout::new::<LinkedListNode<T>>();
-        let new_node = unsafe {
-            let ptr = match NonNull::new(alloc::alloc(new_layout) as *mut LinkedListNode<T>) {
-                Some(ptr) => ptr,
-                None => alloc::handle_alloc_error(new_layout),
-            };
-
-            let tmp = element;
-
-            (*ptr.as_ptr()).content = tmp;
-            (*ptr.as_ptr()).previous = NonNull::dangling();
-            (*ptr.as_ptr()).next = NonNull::dangling();
-            (*ptr.as_ptr()).has_previous = false;
-            (*ptr.as_ptr()).has_next = false;
-
-            ptr
-        };
-
-        new_node
+        unsafe {
+            NonNull::new_unchecked(Box::into_raw(Box::new(Self {
+                content: element,
+                previous: NonNull::dangling(),
+                next: NonNull::dangling(),
+                has_previous: false,
+                has_next: false,
+            })))
+        }
     }
 }
 
@@ -133,7 +122,6 @@ impl<T> LinkedList<T> {
             return Cursor {
                 node: unsafe { self.node.as_mut() },
                 root: self,
-                _marker: std::marker::PhantomData,
             };
         }
 
@@ -147,7 +135,6 @@ impl<T> LinkedList<T> {
             Cursor {
                 node: current_node,
                 root: self,
-                _marker: std::marker::PhantomData,
             }
         }
     }
@@ -158,7 +145,6 @@ impl<T> LinkedList<T> {
             return Cursor {
                 node: unsafe { self.node.as_mut() },
                 root: self,
-                _marker: std::marker::PhantomData,
             };
         }
 
@@ -172,7 +158,6 @@ impl<T> LinkedList<T> {
             Cursor {
                 node: current_node,
                 root: self,
-                _marker: std::marker::PhantomData,
             }
         }
     }
