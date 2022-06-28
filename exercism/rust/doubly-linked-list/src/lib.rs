@@ -34,7 +34,7 @@ type Link<T> = Option<NodePtr<T>>;
 pub struct LinkedList<T> {
     front: Link<T>,
     back: Link<T>,
-    // TODO: add len as field
+    len: usize,
     _marker: std::marker::PhantomData<T>,
 }
 
@@ -76,6 +76,7 @@ impl<T> LinkedList<T> {
         LinkedList::<T> {
             front: None,
             back: None,
+            len: 0,
             _marker: std::marker::PhantomData,
         }
     }
@@ -94,23 +95,7 @@ impl<T> LinkedList<T> {
     }
 
     pub fn len(&self) -> usize {
-        let mut len = 0;
-
-        if self.is_empty() {
-            return 0;
-        }
-
-        len += 1;
-
-        unsafe {
-            let mut current_node = self.front.unwrap().as_ref();
-
-            while current_node.next.is_some() {
-                len += 1;
-                current_node = &*current_node.next.unwrap().as_ptr();
-            }
-        }
-        len
+        self.len
     }
 
     /// Return a cursor positioned on the front element
@@ -226,6 +211,7 @@ impl<T> Cursor<'_, T> {
                 if node_to_take_address == self.list.back.unwrap().as_ptr() {
                     self.list.back = self.node;
                 };
+                self.list.len -= 1;
 
                 Some(Box::from_raw(node_to_take_address).element)
             }
@@ -246,6 +232,7 @@ impl<T> Cursor<'_, T> {
                 if node_to_take_address == self.list.back.unwrap().as_ptr() {
                     self.list.back = self.node;
                 };
+                self.list.len -= 1;
 
                 Some(Box::from_raw(node_to_take_address).element)
             }
@@ -266,6 +253,7 @@ impl<T> Cursor<'_, T> {
                 if node_to_take_address == self.list.back.unwrap().as_ptr() {
                     self.list.back = self.node;
                 };
+                self.list.len -= 1;
 
                 Some(Box::from_raw(node_to_take_address).element)
             }
@@ -273,6 +261,7 @@ impl<T> Cursor<'_, T> {
             unsafe {
                 self.list.front = None;
                 self.list.back = None;
+                self.list.len -= 1;
 
                 Some(Box::from_raw(self.node?.as_ptr()).element)
             }
@@ -284,6 +273,7 @@ impl<T> Cursor<'_, T> {
             self.list.front = Some(Node::<T>::create(element));
             self.list.back = self.list.front;
             self.node = self.list.front;
+            self.list.len += 1;
             return;
         }
 
@@ -297,6 +287,7 @@ impl<T> Cursor<'_, T> {
                 (*new_next_node.as_ptr()).previous = self.node;
             }
             self.list.back = Some(new_next_node);
+            self.list.len += 1;
         } else {
             // If there is a next node doesn't exist
             let new_next_node = Node::<T>::create(element);
@@ -309,6 +300,7 @@ impl<T> Cursor<'_, T> {
                 (*new_next_node.as_ptr()).next = Some(NonNull::from(existing_next_node));
                 (*new_next_node.as_ptr()).previous = self.node;
             }
+            self.list.len += 1;
         }
     }
 
@@ -317,6 +309,7 @@ impl<T> Cursor<'_, T> {
             self.list.front = Some(Node::<T>::create(element));
             self.list.back = self.list.front;
             self.node = self.list.front;
+            self.list.len += 1;
             return;
         }
 
@@ -330,6 +323,7 @@ impl<T> Cursor<'_, T> {
                 (*new_previous_node.as_ptr()).next = self.node;
             }
             self.list.front = Some(new_previous_node);
+            self.list.len += 1;
         } else {
             // If there is a previous node
             let new_previous_node = Node::<T>::create(element);
@@ -343,6 +337,7 @@ impl<T> Cursor<'_, T> {
                     Some(NonNull::from(existing_previous_node));
                 (*new_previous_node.as_ptr()).next = self.node;
             }
+            self.list.len += 1;
         }
     }
 }
