@@ -26,8 +26,6 @@ mod pre_implemented;
 // https://www.youtube.com/watch?v=iVYWDIW71jk&ab_channel=JonGjengset
 // https://rust-unofficial.github.io/too-many-lists/sixth.html
 
-use std::alloc;
-use std::ptr;
 use std::ptr::NonNull;
 
 type NodePtr<T> = NonNull<Node<T>>;
@@ -165,7 +163,6 @@ impl<T> Cursor<'_, T> {
         if self.list.is_empty() {
             return None;
         } else {
-            // Some(&mut (*self.node?.as_ptr()).element)
             unsafe { Some(&mut (*self.node?.as_ptr()).element) }
         }
     }
@@ -217,89 +214,67 @@ impl<T> Cursor<'_, T> {
                 (*node.previous.unwrap().as_ptr()).next = node.next;
                 (*node.next.unwrap().as_ptr()).previous = node.previous;
 
-                // Retrieve value before drop
-                let res = ptr::read(&node.element);
-
-                let to_deallocate = node as *mut Node<T>;
+                // Retrieve address before move
+                let node_to_take_address = self.node?.as_ptr();
 
                 // Go to the next node
                 self.next();
 
-                // Drop the whole node, value involved
-                alloc::dealloc(to_deallocate as *mut u8, alloc::Layout::new::<Node<T>>());
-
-                if to_deallocate == self.list.front.unwrap().as_ptr() {
-                    self.list.front = Some(NonNull::from(self.node.unwrap().as_ref()));
+                if node_to_take_address == self.list.front.unwrap().as_ptr() {
+                    self.list.front = self.node;
                 };
-                if to_deallocate == self.list.back.unwrap().as_ptr() {
-                    self.list.back = Some(NonNull::from(self.node.unwrap().as_ref()));
+                if node_to_take_address == self.list.back.unwrap().as_ptr() {
+                    self.list.back = self.node;
                 };
 
-                Some(res)
+                Some(Box::from_raw(node_to_take_address).element)
             }
         } else if node.previous.is_none() && node.next.is_some() {
             unsafe {
-                // Retrieve value before drop
-                let res = ptr::read(&node.element);
+                // Link remaining nodes
+                (*node.next.unwrap().as_ptr()).previous = None;
 
-                let to_deallocate = node as *mut Node<T>;
+                // Retrieve address before move
+                let node_to_take_address = self.node?.as_ptr();
 
                 // Go to the next node
                 self.next();
 
-                // Drop the whole node, value involved
-                alloc::dealloc(to_deallocate as *mut u8, alloc::Layout::new::<Node<T>>());
-
-                self.node.unwrap().as_mut().previous = None;
-
-                if to_deallocate == self.list.front.unwrap().as_ptr() {
-                    self.list.front = Some(NonNull::from(self.node.unwrap().as_ref()));
+                if node_to_take_address == self.list.front.unwrap().as_ptr() {
+                    self.list.front = self.node;
                 };
-                if to_deallocate == self.list.back.unwrap().as_ptr() {
-                    self.list.back = Some(NonNull::from(self.node.unwrap().as_ref()));
+                if node_to_take_address == self.list.back.unwrap().as_ptr() {
+                    self.list.back = self.node;
                 };
 
-                Some(res)
+                Some(Box::from_raw(node_to_take_address).element)
             }
         } else if node.previous.is_some() && node.next.is_none() {
-            // node.content.is_null() = false;
-
             unsafe {
-                // Retrieve value before drop
-                let res = ptr::read(&node.element);
+                // Link remaining nodes
+                (*node.previous.unwrap().as_ptr()).next = None;
 
-                let to_deallocate = node as *mut Node<T>;
+                // Retrieve address before move
+                let node_to_take_address = self.node?.as_ptr();
 
                 // Go to the previous node
                 self.prev();
 
-                // Drop the whole node, value involved
-                alloc::dealloc(to_deallocate as *mut u8, alloc::Layout::new::<Node<T>>());
-
-                self.node.unwrap().as_mut().next = None;
-
-                if to_deallocate == self.list.front.unwrap().as_ptr() {
-                    self.list.front = Some(NonNull::from(self.node.unwrap().as_ref()));
+                if node_to_take_address == self.list.front.unwrap().as_ptr() {
+                    self.list.front = self.node;
                 };
-                if to_deallocate == self.list.back.unwrap().as_ptr() {
-                    self.list.back = Some(NonNull::from(self.node.unwrap().as_ref()));
+                if node_to_take_address == self.list.back.unwrap().as_ptr() {
+                    self.list.back = self.node;
                 };
 
-                Some(res)
+                Some(Box::from_raw(node_to_take_address).element)
             }
         } else {
             unsafe {
-                let res = ptr::read(&node.element);
-
-                // Deallocate the only remaining node
-                alloc::dealloc(
-                    self.list.front.unwrap().as_ptr() as *mut u8,
-                    alloc::Layout::new::<Node<T>>(),
-                );
                 self.list.front = None;
                 self.list.back = None;
 
-                Some(res)
+                Some(Box::from_raw(self.node?.as_ptr()).element)
             }
         }
     }
