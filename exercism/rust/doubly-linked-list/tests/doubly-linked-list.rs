@@ -372,81 +372,86 @@ fn drop_no_double_frees_custom() {
     let mut list: LinkedList<DropCounter> = LinkedList::new();
     assert_eq!(list.len(), 0);
     list.push_back(DropCounter(&counter));
-    // list.push_back(DropCounter(&counter));
+    list.push_back(DropCounter(&counter));
 
     // assert_eq!(list.len(), 1);
 
-    // assert_eq!(list.len(), 2);
-    // drop(list);
-    // assert_eq!(counter.get(), 2);
+    assert_eq!(list.len(), 2);
+    drop(list);
+    assert_eq!(counter.get(), 2);
 
     // assert_eq!(list.len(), N);
     // drop(list);
     // assert_eq!(counter.get(), N);
 }
 
-// #[test]
-// fn drop_no_double_frees() {
-//     use std::cell::Cell;
-//     struct DropCounter<'a>(&'a Cell<usize>);
+#[test]
+fn drop_no_double_frees() {
+    use std::cell::Cell;
+    struct DropCounter<'a>(&'a Cell<usize>);
 
-//     impl<'a> Drop for DropCounter<'a> {
-//         fn drop(&mut self) {
-//             let num = self.0.get();
-//             self.0.set(num + 1);
-//         }
-//     }
+    impl<'a> Drop for DropCounter<'a> {
+        fn drop(&mut self) {
+            let num = self.0.get();
+            self.0.set(num + 1);
+        }
+    }
 
-//     const N: usize = 15;
+    const N: usize = 15;
 
-//     let counter = Cell::new(0);
-//     let list = std::iter::repeat_with(|| DropCounter(&counter))
-//         .take(N)
-//         .collect::<LinkedList<_>>();
+    let counter = Cell::new(0);
+    let list = std::iter::repeat_with(|| DropCounter(&counter))
+        .take(N)
+        .collect::<LinkedList<_>>();
 
-//     assert_eq!(list.len(), N);
-//     drop(list);
-//     assert_eq!(counter.get(), N);
-// }
+    assert_eq!(list.len(), N);
+    drop(list);
+    assert_eq!(counter.get(), N);
+}
 
-// #[test]
-// fn drop_large_list_custom() {
-//     drop((0..200_000).collect::<LinkedList<i32>>());
-// }
+#[test]
+fn drop_large_list_custom() {
+    use std::time::Instant;
 
-// #[test]
-// fn drop_large_list() {
-//     drop((0..2_000_000).collect::<LinkedList<i32>>());
-// }
+    let start = Instant::now();
+    drop((0..200_000).collect::<LinkedList<i32>>());
+    let duration = start.elapsed();
+    println!("Time elapsed in expensive_function() is: {:?}", duration);
+}
 
-// // ———————————————————————————————————————————————————————————
-// // Tests for Step 5 (advanced): covariance and Send/Sync
-// // ———————————————————————————————————————————————————————————
+#[test]
+fn drop_large_list() {
+    drop((0..2_000_000).collect::<LinkedList<i32>>());
+}
 
-// // These are compile time tests. They won't compile unless your
-// // code passes.
-// // Additional tests for code that must *not* compile are in
-// // pre_implemented.rs for technical reasons.
+// ———————————————————————————————————————————————————————————
+// Tests for Step 5 (advanced): covariance and Send/Sync
+// ———————————————————————————————————————————————————————————
 
-// #[cfg(feature = "advanced")]
-// #[test]
-// fn advanced_linked_list_is_send_sync() {
-//     trait AssertSend: Send {}
-//     trait AssertSync: Sync {}
+// These are compile time tests. They won't compile unless your
+// code passes.
+// Additional tests for code that must *not* compile are in
+// pre_implemented.rs for technical reasons.
 
-//     impl<T: Send> AssertSend for LinkedList<T> {}
-//     impl<T: Sync> AssertSync for LinkedList<T> {}
-// }
+#[cfg(feature = "advanced")]
+#[test]
+fn advanced_linked_list_is_send_sync() {
+    trait AssertSend: Send {}
+    trait AssertSync: Sync {}
 
-// #[cfg(feature = "advanced")]
-// #[allow(dead_code)]
-// #[test]
-// fn advanced_is_covariant() {
-//     fn a<'a>(x: LinkedList<&'static str>) -> LinkedList<&'a str> {
-//         x
-//     }
+    impl<T: Send> AssertSend for LinkedList<T> {}
+    impl<T: Sync> AssertSync for LinkedList<T> {}
+}
 
-//     fn a_iter<'a>(i: Iter<'static, &'static str>) -> Iter<'a, &'a str> {
-//         i
-//     }
-// }
+#[cfg(feature = "advanced")]
+#[allow(dead_code)]
+#[test]
+fn advanced_is_covariant() {
+    fn a<'a>(x: LinkedList<&'static str>) -> LinkedList<&'a str> {
+        x
+    }
+
+    fn a_iter<'a>(i: Iter<'static, &'static str>) -> Iter<'a, &'a str> {
+        i
+    }
+}

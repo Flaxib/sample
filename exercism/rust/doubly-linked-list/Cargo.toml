@@ -4,5 +4,6 @@ version = "0.0.0"
 edition = "2021"
 
 [features]
+default = ["advanced"]
 # check correct covariance and Send, Sync
 advanced = []
