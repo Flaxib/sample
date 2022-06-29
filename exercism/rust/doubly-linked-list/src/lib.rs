@@ -145,42 +145,30 @@ impl<T> Drop for LinkedList<T> {
 impl<T> Cursor<'_, T> {
     /// Take a mutable reference to the current element
     pub fn peek_mut(&mut self) -> Option<&mut T> {
-        if self.list.is_empty() {
-            return None;
-        } else {
-            unsafe { Some(&mut (*self.node?.as_ptr()).element) }
-        }
+        self.node
+            .and_then(|node_ptr| unsafe { Some(&mut (*node_ptr.as_ptr()).element) })
+    }
+
+    fn _peek_mut(&mut self, node: Option<NonNull<Node<T>>>) -> Option<&mut T> {
+        node.and_then(|node_ptr| {
+            self.node = Some(node_ptr);
+            self.peek_mut()
+        })
     }
 
     /// Move one position forward (towards the back) and
     /// return a reference to the new position
     #[allow(clippy::should_implement_trait)]
     pub fn next(&mut self) -> Option<&mut T> {
-        if self.list.is_empty() {
-            return None;
-        }
-        let node = unsafe { self.node.unwrap().as_ref() };
-        if node.next.is_none() {
-            None
-        } else {
-            self.node = node.next;
-            self.peek_mut()
-        }
+        self.node
+            .and_then(|current_ptr| self._peek_mut(unsafe { current_ptr.as_ref().next }))
     }
 
     /// Move one position backward (towards the front) and
     /// return a reference to the new position
     pub fn prev(&mut self) -> Option<&mut T> {
-        if self.list.is_empty() {
-            return None;
-        }
-        let node = unsafe { self.node.unwrap().as_ref() };
-        if node.previous.is_none() {
-            None
-        } else {
-            self.node = node.previous;
-            self.peek_mut()
-        }
+        self.node
+            .and_then(|current_ptr| self._peek_mut(unsafe { current_ptr.as_ref().previous }))
     }
 
     /// Remove and return the element at the current position and move the cursor
@@ -269,38 +257,37 @@ impl<T> Cursor<'_, T> {
     }
 
     pub fn insert_after(&mut self, element: T) {
-        if self.list.is_empty() {
-            self.list.front = Some(Node::<T>::create(element));
-            self.list.back = self.list.front;
-            self.node = self.list.front;
-            self.list.len += 1;
-            return;
-        }
+        let new_next_node = Node::<T>::create(element);
 
-        let node = unsafe { self.node.unwrap().as_mut() };
-
-        if node.next.is_none() {
-            // If the next node doesn't exist
-            let new_next_node = Node::<T>::create(element);
-            node.next = Some(new_next_node);
-            unsafe {
-                (*new_next_node.as_ptr()).previous = self.node;
-            }
-            self.list.back = Some(new_next_node);
+        if self.node.is_none() {
+            self.node = Some(new_next_node);
+            self.list.front = self.node;
+            self.list.back = self.node;
             self.list.len += 1;
         } else {
-            // If there is a next node doesn't exist
-            let new_next_node = Node::<T>::create(element);
-            let existing_next_node = unsafe { &mut *node.next.unwrap().as_ptr() };
+            let node = unsafe { self.node.unwrap().as_mut() };
 
-            existing_next_node.previous = Some(new_next_node);
-            node.next = Some(new_next_node);
+            if node.next.is_none() {
+                // If the next node doesn't exist
+                node.next = Some(new_next_node);
+                unsafe {
+                    (*new_next_node.as_ptr()).previous = self.node;
+                }
+                self.list.back = Some(new_next_node);
+                self.list.len += 1;
+            } else {
+                // If there is a next node doesn't exist
+                let existing_next_node = unsafe { &mut *node.next.unwrap().as_ptr() };
 
-            unsafe {
-                (*new_next_node.as_ptr()).next = Some(NonNull::from(existing_next_node));
-                (*new_next_node.as_ptr()).previous = self.node;
+                existing_next_node.previous = Some(new_next_node);
+                node.next = Some(new_next_node);
+
+                unsafe {
+                    (*new_next_node.as_ptr()).next = Some(NonNull::from(existing_next_node));
+                    (*new_next_node.as_ptr()).previous = self.node;
+                }
+                self.list.len += 1;
             }
-            self.list.len += 1;
         }
     }
 
