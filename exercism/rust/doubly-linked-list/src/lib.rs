@@ -257,38 +257,34 @@ impl<T> Cursor<'_, T> {
     }
 
     pub fn insert_after(&mut self, element: T) {
-        let new_next_node = Node::<T>::create(element);
+        let mut new_next_node = Node::<T>::create(element);
 
-        if self.node.is_none() {
-            self.node = Some(new_next_node);
-            self.list.front = self.node;
-            self.list.back = self.node;
-            self.list.len += 1;
-        } else {
-            let node = unsafe { self.node.unwrap().as_mut() };
-
-            if node.next.is_none() {
-                // If the next node doesn't exist
-                node.next = Some(new_next_node);
-                unsafe {
-                    (*new_next_node.as_ptr()).previous = self.node;
-                }
-                self.list.back = Some(new_next_node);
+        let mut cursor_node = match self.node {
+            Some(node) => node,
+            None => {
+                self.node = Some(new_next_node);
+                self.list.front = self.node;
+                self.list.back = self.node;
                 self.list.len += 1;
+                return;
+            }
+        };
+
+        unsafe {
+            if let Some(mut next_node) = cursor_node.as_mut().next {
+                next_node.as_mut().previous = Some(new_next_node);
+                new_next_node.as_mut().next = Some(NonNull::from(next_node));
             } else {
-                // If there is a next node doesn't exist
-                let existing_next_node = unsafe { &mut *node.next.unwrap().as_ptr() };
-
-                existing_next_node.previous = Some(new_next_node);
-                node.next = Some(new_next_node);
-
-                unsafe {
-                    (*new_next_node.as_ptr()).next = Some(NonNull::from(existing_next_node));
-                    (*new_next_node.as_ptr()).previous = self.node;
-                }
-                self.list.len += 1;
+                self.list.back = Some(new_next_node);
             }
         }
+
+        unsafe {
+            cursor_node.as_mut().next = Some(new_next_node);
+            new_next_node.as_mut().previous = Some(cursor_node);
+        }
+
+        self.list.len += 1;
     }
 
     pub fn insert_before(&mut self, element: T) {
