@@ -60,7 +60,7 @@ pub struct Iter<'a, T> {
 }
 
 impl<T> Node<T> {
-    pub fn create(element: T) -> NodePtr<T> {
+    pub fn create_linkless(element: T) -> NodePtr<T> {
         unsafe {
             NonNull::new_unchecked(Box::into_raw(Box::new(Self {
                 element,
@@ -68,6 +68,11 @@ impl<T> Node<T> {
                 next: None,
             })))
         }
+    }
+
+    pub unsafe fn link(mut previous: NodePtr<T>, mut next: NodePtr<T>) {
+        next.as_mut().previous = Some(previous);
+        previous.as_mut().next = Some(NonNull::from(next));
     }
 }
 
@@ -138,6 +143,11 @@ impl<T> Drop for LinkedList<T> {
         let mut cursor = self.cursor_front();
         while let Some(_) = cursor.take() {}
     }
+}
+
+enum BackOrFront {
+    Back,
+    Front,
 }
 
 // the cursor is expected to act as if it is at the position of an element
@@ -257,12 +267,43 @@ impl<T> Cursor<'_, T> {
     }
 
     pub fn insert_after(&mut self, element: T) {
-        let mut new_next_node = Node::<T>::create(element);
+        let do_insert = unsafe {
+            |cursor_node: &mut NodePtr<T>, new_node_to_insert: &mut NodePtr<T>| {
+                if let Some(next_node) = cursor_node.as_mut().next {
+                    Node::<T>::link(*new_node_to_insert, next_node);
+                }
+                Node::<T>::link(*cursor_node, *new_node_to_insert);
+            }
+        };
+
+        self._insert(element, BackOrFront::Back, do_insert);
+    }
+
+    pub fn insert_before(&mut self, element: T) {
+        let do_insert = unsafe {
+            |cursor_node: &mut NodePtr<T>, new_node_to_insert: &mut NodePtr<T>| {
+                if let Some(previous_node) = cursor_node.as_mut().previous {
+                    Node::<T>::link(previous_node, *new_node_to_insert);
+                }
+                Node::<T>::link(*new_node_to_insert, *cursor_node);
+            }
+        };
+
+        self._insert(element, BackOrFront::Front, do_insert);
+    }
+
+    fn _insert(
+        &mut self,
+        element: T,
+        back_or_front: BackOrFront,
+        do_insert: impl Fn(&mut NodePtr<T>, &mut NodePtr<T>),
+    ) {
+        let mut new_node_to_insert = Node::<T>::create_linkless(element);
 
         let mut cursor_node = match self.node {
             Some(node) => node,
             None => {
-                self.node = Some(new_next_node);
+                self.node = Some(new_node_to_insert);
                 self.list.front = self.node;
                 self.list.back = self.node;
                 self.list.len += 1;
@@ -270,58 +311,18 @@ impl<T> Cursor<'_, T> {
             }
         };
 
-        unsafe {
-            if let Some(mut next_node) = cursor_node.as_mut().next {
-                next_node.as_mut().previous = Some(new_next_node);
-                new_next_node.as_mut().next = Some(NonNull::from(next_node));
-            } else {
-                self.list.back = Some(new_next_node);
-            }
-        }
+        do_insert(&mut cursor_node, &mut new_node_to_insert);
 
-        unsafe {
-            cursor_node.as_mut().next = Some(new_next_node);
-            new_next_node.as_mut().previous = Some(cursor_node);
+        let extremity_node = match back_or_front {
+            BackOrFront::Front => &mut self.list.front,
+            BackOrFront::Back => &mut self.list.back,
+        };
+
+        if *extremity_node == Some(cursor_node) {
+            *extremity_node = Some(new_node_to_insert);
         }
 
         self.list.len += 1;
-    }
-
-    pub fn insert_before(&mut self, element: T) {
-        if self.list.is_empty() {
-            self.list.front = Some(Node::<T>::create(element));
-            self.list.back = self.list.front;
-            self.node = self.list.front;
-            self.list.len += 1;
-            return;
-        }
-
-        let node = unsafe { self.node.unwrap().as_mut() };
-
-        if node.previous.is_none() {
-            // If the previous node doesn't exist
-            let new_previous_node = Node::<T>::create(element);
-            node.previous = Some(new_previous_node);
-            unsafe {
-                (*new_previous_node.as_ptr()).next = self.node;
-            }
-            self.list.front = Some(new_previous_node);
-            self.list.len += 1;
-        } else {
-            // If there is a previous node
-            let new_previous_node = Node::<T>::create(element);
-            let mut existing_previous_node = unsafe { &mut *node.previous.unwrap().as_ptr() };
-
-            existing_previous_node.next = Some(new_previous_node);
-            node.previous = Some(new_previous_node);
-
-            unsafe {
-                (*new_previous_node.as_ptr()).previous =
-                    Some(NonNull::from(existing_previous_node));
-                (*new_previous_node.as_ptr()).next = self.node;
-            }
-            self.list.len += 1;
-        }
     }
 }
 
