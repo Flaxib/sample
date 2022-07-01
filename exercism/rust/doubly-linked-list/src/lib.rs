@@ -189,81 +189,26 @@ impl<T> Cursor<'_, T> {
             return None;
         }
 
-        let node = unsafe { self.node.unwrap().as_mut() };
+        let mut node = self.node?;
+        let &mut Node { previous, next, .. } = unsafe { node.as_mut() };
 
-        if node.previous.is_some() && node.next.is_some() {
-            unsafe {
-                // Link remaining nodes
-                (*node.previous.unwrap().as_ptr()).next = node.next;
-                (*node.next.unwrap().as_ptr()).previous = node.previous;
+        let target_node = next.or(previous);
+        self.node = target_node;
 
-                // Retrieve address before move
-                let node_to_take_address = self.node?.as_ptr();
-
-                // Go to the next node
-                self.next();
-
-                if node_to_take_address == self.list.front.unwrap().as_ptr() {
-                    self.list.front = self.node;
-                };
-                if node_to_take_address == self.list.back.unwrap().as_ptr() {
-                    self.list.back = self.node;
-                };
-                self.list.len -= 1;
-
-                Some(Box::from_raw(node_to_take_address).element)
+        unsafe {
+            match previous {
+                Some(mut previous_ptr) => previous_ptr.as_mut().next = next,
+                None => self.list.front = self.node,
             }
-        } else if node.previous.is_none() && node.next.is_some() {
-            unsafe {
-                // Link remaining nodes
-                (*node.next.unwrap().as_ptr()).previous = None;
-
-                // Retrieve address before move
-                let node_to_take_address = self.node?.as_ptr();
-
-                // Go to the next node
-                self.next();
-
-                if node_to_take_address == self.list.front.unwrap().as_ptr() {
-                    self.list.front = self.node;
-                };
-                if node_to_take_address == self.list.back.unwrap().as_ptr() {
-                    self.list.back = self.node;
-                };
-                self.list.len -= 1;
-
-                Some(Box::from_raw(node_to_take_address).element)
-            }
-        } else if node.previous.is_some() && node.next.is_none() {
-            unsafe {
-                // Link remaining nodes
-                (*node.previous.unwrap().as_ptr()).next = None;
-
-                // Retrieve address before move
-                let node_to_take_address = self.node?.as_ptr();
-
-                // Go to the previous node
-                self.prev();
-
-                if node_to_take_address == self.list.front.unwrap().as_ptr() {
-                    self.list.front = self.node;
-                };
-                if node_to_take_address == self.list.back.unwrap().as_ptr() {
-                    self.list.back = self.node;
-                };
-                self.list.len -= 1;
-
-                Some(Box::from_raw(node_to_take_address).element)
-            }
-        } else {
-            unsafe {
-                self.list.front = None;
-                self.list.back = None;
-                self.list.len -= 1;
-
-                Some(Box::from_raw(self.node?.as_ptr()).element)
+            match next {
+                Some(mut next_ptr) => next_ptr.as_mut().previous = previous,
+                None => self.list.back = self.node,
             }
         }
+
+        self.list.len -= 1;
+
+        unsafe { Some(Box::from_raw(node.as_mut() as *mut Node<T>).element) }
     }
 
     pub fn insert_after(&mut self, element: T) {
