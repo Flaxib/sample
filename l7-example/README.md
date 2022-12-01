@@ -1,5 +1,9 @@
 This application has been initiated by this command `npx degit solidjs/templates/ts l7-example`.
 
+## Documentation link
+
+https://l7.antv.antgroup.com/en/tutorial/map/leaflet
+
 ## Usage
 
 Those templates dependencies are maintained via [pnpm](https://pnpm.io) via `pnpm up -Lri`.

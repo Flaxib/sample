@@ -9,20 +9,9 @@ function buildMap(div: HTMLDivElement) {
     minZoom: 1,
   }).setView([30, 112], 3);
 
-  L.marker([30, 112])
-    .addTo(map)
-    .setIcon(
-      new L.Icon({
-        iconUrl:
-          "https://gw.alipayobjects.com/mdn/rms_5e897d/afts/img/A*6ONoRKNECC0AAAAAAAAAAAAAARQnAQ",
-        iconSize: [16, 16],
-      })
-    )
-    .bindPopup("A pretty CSS3 popup.<br> Easily customizable.")
-    .openPopup();
-
-  // TO KNOW: what is the argument of the 'L7Layer' constructor?
-  const l7layer = new L7Layer([]).addTo(map);
+  // The argument in the constructor of the 'L7Layer' is simply pass to
+  // Leaflet Layer as options for the constructor
+  const l7layer = new L7Layer({}).addTo(map);
   const scene = l7layer.getScene();
   fetch("https://gw.alipayobjects.com/os/rmsportal/UEXQMifxtkQlYfChpPwT.txt")
     .then((res) => res.text())
@@ -44,7 +33,6 @@ function buildMap(div: HTMLDivElement) {
           opacity: 0.8,
           blur: 0.99,
         });
-      console.log("layer", layer);
       scene.addLayer(layer);
     });
 
