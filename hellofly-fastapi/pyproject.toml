@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "hellofly"
+version = "0.1.0"
+description = ""
+authors = ["frozar <fabien.rozar@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+python-dotenv = "^1.0.0"
+psycopg2-binary = "^2.9.5"
+fastapi = "^0.95.0"
+uvicorn = {extras = ["standard"], version = "^0.21.1"}
+pytest = "^7.3.0"
+httpx = "^0.24.0"
+pytest-watch = "^4.2.0"
+pytest-sugar = "^0.9.7"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
