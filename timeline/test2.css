@@ -1,0 +1,209 @@
+.pa-4 {
+    box-sizing: border-box;
+    overflow-y: scroll;
+    -webkit-text-size-adjust: 100%;
+    word-break: normal;
+    -moz-tab-size: 4;
+    tab-size: 4
+}
+
+.pa-4 {
+    font-family: Roboto,sans-serif;
+    line-height: 1.5;
+    font-size: 1rem;
+    overflow-x: hidden;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-tap-highlight-color: rgba(0,0,0,0)
+}
+
+.pa-4 *,.pa-4 *:before,.pa-4 *:after {
+    background-repeat: no-repeat;
+    box-sizing: inherit;
+}
+
+.pa-4 * {
+    padding: 0;
+    margin: 0
+}
+
+.pa-4 {
+    padding: 16px!important;
+}
+
+.v-timeline {
+    display: grid;
+    grid-auto-flow: dense;
+    position: relative;
+}
+
+.v-timeline--align-start {
+    --v-timeline-line-size-base: 100%;
+    --v-timeline-line-size-offset: 12px;
+}
+
+.v-timeline--vertical.v-timeline--justify-auto {
+    grid-template-columns: auto min-content auto;
+}
+
+.v-timeline--vertical.v-timeline.v-timeline--side-end .v-timeline-item .v-timeline-item__body {
+    grid-column: 3;
+    padding-inline-start: 24px;
+    padding-inline-end: initial;
+    justify-self: flex-start;
+}
+
+.v-timeline--vertical.v-timeline--align-start {
+    align-items: flex-start;
+}
+
+.v-timeline--vertical.v-timeline {
+    grid-row-gap: 24px;
+    height: 100%;
+}
+
+.v-timeline-item {
+    display: contents;
+}
+
+
+.v-timeline--vertical.v-timeline .v-timeline-item:nth-child(2n+1) .v-timeline-item__body {
+    grid-column: 3;
+    padding-inline-start: 24px;
+}
+.v-timeline--vertical.v-timeline .v-timeline-item:first-child .v-timeline-divider, .v-timeline--vertical.v-timeline .v-timeline-item:first-child .v-timeline-item__body, .v-timeline--vertical.v-timeline .v-timeline-item:first-child .v-timeline-item__opposite {
+    padding-block-start: 24px;
+}
+
+.d-flex {
+    display: flex!important;
+}
+
+.me-4 {
+    margin-inline-end: 16px!important;
+}
+
+.text-caption {
+    font-size: .75rem!important;
+    font-weight: 400;
+    line-height: 1.25rem;
+    letter-spacing: .0333333333em!important;
+    font-family: Roboto,sans-serif!important;
+    text-transform: none!important;
+}
+
+.v-timeline--vertical.v-timeline .v-timeline-item:first-child .v-timeline-divider, .v-timeline--vertical.v-timeline .v-timeline-item:first-child .v-timeline-item__body, .v-timeline--vertical.v-timeline .v-timeline-item:first-child .v-timeline-item__opposite {
+    padding-block-start: 24px;
+}
+
+.v-timeline--vertical.v-timeline--align-start .v-timeline-divider {
+    justify-content: flex-start;
+}
+.v-timeline--vertical .v-timeline-divider {
+    height: 100%;
+    flex-direction: column;
+    grid-column: 2;
+}
+.v-timeline-divider {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.v-timeline--vertical.v-timeline--align-start .v-timeline-divider .v-timeline-divider__before {
+    height: calc(var(--v-timeline-line-size-offset) + var(--v-timeline-dot-size) / 2 - var(--v-timeline-line-inset));
+
+}
+
+.v-timeline--align-start .v-timeline-item:first-child .v-timeline-divider__before {
+    --v-timeline-line-size-offset: 24px;
+}
+.v-timeline--vertical .v-timeline-item:first-child .v-timeline-divider__before {
+    /* height: calc(var(--v-timeline-line-size-base) + 12px - var(--v-timeline-line-inset)); */
+    top: 0;
+}
+.v-timeline--vertical .v-timeline-divider__before {
+    height: calc(var(--v-timeline-line-size-base) + 12px - var(--v-timeline-line-inset));
+    width: var(--v-timeline-line-thickness);
+    top: -12px;
+}
+.v-timeline-divider__before {
+    background: #0000001F;
+    /* background: rgba(var(--v-border-color),var(--v-border-opacity)); */
+    /* background-color: #0000001F; */
+    position: absolute;
+}
+
+.v-timeline .v-timeline-divider__dot {
+    /* background: rgb(var(--v-theme-on-surface-variant)); */
+    background: rgb(238,238,238);
+}
+
+.v-timeline-divider__dot--size-small {
+    height: 30px;
+    width: 30px;
+}
+.v-timeline-divider__dot {
+    z-index: 1;
+    flex-shrink: 0;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 0 0 0 var(--v-shadow-key-umbra-opacity, rgba(0, 0, 0, .2)),0 0 0 0 var(--v-shadow-key-penumbra-opacity, rgba(0, 0, 0, .14)),0 0 0 0 var(--v-shadow-key-penumbra-opacity, rgba(0, 0, 0, .12));
+}
+
+.v-timeline-divider__dot--size-small .v-timeline-divider__inner-dot {
+    height: calc(100% - 8px);
+    width: calc(100% - 8px);
+}
+
+.v-timeline .v-timeline-divider__inner-dot {
+    background: rgb(var(--v-theme-on-surface));
+}
+.v-timeline-divider__inner-dot {
+    align-items: center;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+}
+.bg-pink {
+    background-color: #e91e63!important;
+    color: #fff!important;
+}
+
+.v-timeline--vertical.v-timeline--align-start .v-timeline-divider .v-timeline-divider__after {
+    height: calc(var(--v-timeline-line-size-base) - var(--v-timeline-dot-size) / 2 + var(--v-timeline-line-size-offset) - var(--v-timeline-line-inset));
+}
+
+.v-timeline--align-start .v-timeline-item:first-child .v-timeline-divider__after {
+    --v-timeline-line-size-offset: -12px;
+}
+.v-timeline--vertical .v-timeline-item:first-child .v-timeline-divider__after {
+    height: calc(var(--v-timeline-line-size-base) - var(--v-timeline-line-inset) + var(--v-timeline-line-size-offset));
+}
+.v-timeline--vertical .v-timeline-divider__after {
+    height: calc(var(--v-timeline-line-size-base) + 12px - var(--v-timeline-line-inset));
+    width: var(--v-timeline-line-thickness);
+    bottom: -12px;
+}
+.v-timeline-divider__after {
+    /* background: rgba(var(--v-border-color),var(--v-border-opacity)); */
+    background: #0000001F;
+    /* background-color: #0000001F; */
+    position: absolute;
+}
+
+.v-timeline--vertical .v-timeline-item:last-child .v-timeline-divider__after {
+    /* height: calc(var(--v-timeline-line-size-base) + 12px - var(--v-timeline-line-inset)); */
+    bottom: 0;
+}
+
+.v-timeline--align-start .v-timeline-item:last-child .v-timeline-divider__after {
+    --v-timeline-line-size-offset: 0px;
+}
+
+.v-timeline--vertical.v-timeline .v-timeline-item:last-child .v-timeline-divider, .v-timeline--vertical.v-timeline .v-timeline-item:last-child .v-timeline-item__body, .v-timeline--vertical.v-timeline .v-timeline-item:last-child .v-timeline-item__opposite {
+    padding-block-end: 24px;
+}
