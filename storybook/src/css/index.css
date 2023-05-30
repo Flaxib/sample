@@ -1,0 +1,33 @@
+@import url(https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css);
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+    monospace;
+}
+
+.list-item {
+  display: flex;
+  align-items: center;
+  width: fit-content;
+  background-color: bisque;
+  padding: 5px 10px;
+  gap: 1em;
+}
+
+.fa.fa-star {
+  color: gray;
+  cursor: pointer;
+
+  &.checked {
+    color: orange;
+  }
+}
