@@ -10,17 +10,39 @@ type Story = StoryObj<TaskListProps>;
 export const TaskDefault: Story = {
     args: {
         tasks: [
-            {...TaskStories.TaskDefault.args},
-            {...TaskStories.Pinned.args},
-            {...TaskStories.Archived.args},
+            {...TaskStories.TaskDefault.args, id: 1},
+            {...TaskStories.TaskDefault.args, id: 2},
+            {...TaskStories.TaskDefault.args, id: 3}
         ]
     },      
 }; 
 
+export const WithPinnedTasks = {
+    args: {
+      tasks: [
+        ...TaskDefault.args.tasks.slice(0, 5),
+        { id: 6, title: 'Task 6', state: 'TASK_PINNED' },
+      ],
+    },
+};
 
+export const Loading = {
+    args: {
+      tasks: [],
+      loading: true,
+    },
+};
+
+export const Empty = {
+    args: {
+      ...Loading.args,
+      loading: false,
+    },
+  };
+  
 export default {
     component: TaskList,
     title: 'TaskList',
-    decorators: [(story) => <div style={{ padding: '3rem' }}>{story()}</div>],
-    tags: ['autodocs']
+    decorators: [(story: any) => <div style={{ padding: '3rem' }}>{story()}</div>],
+    tags: ['autodocs'],
   };

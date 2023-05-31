@@ -1,4 +1,4 @@
-import { StoryObj } from '@storybook/html';
+import { StoryObj, Meta } from '@storybook/html';
 import Task, { TaskProps } from './Task';
 
 
@@ -34,4 +34,8 @@ export default {
     title: 'Task',
     tags: ['autodocs'],
     render: (props: TaskProps) => <Task {...props}/>,
+    argTypes: {
+        backgroundColor: { control: 'color' },
+        onClick: { action: 'clicked' }
+      },
 };
