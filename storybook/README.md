@@ -1,3 +1,6 @@
+Inpiré par ce dépôt :
+https://github.com/elite174/storybook-solid-js
+
 ## Usage
 
 Those templates dependencies are maintained via [pnpm](https://pnpm.io) via `pnpm up -Lri`.
