@@ -15,7 +15,7 @@ const meta = {
   },
 } satisfies Meta<typeof Button>;
 
-// export default meta;
+export default meta;
 type Story = StoryObj<typeof meta>;
 
 // More on writing stories with args: https://storybook.js.org/docs/7.0/solid/writing-stories/args
